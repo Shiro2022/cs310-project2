@@ -25,26 +25,77 @@ public class Database {
         String result = null;
         
         // INSERT YOUR CODE HERE
-        
+        ResultSet resultset = null;    
+        try {
+            
+            String query = "SELECT * FROM section WHERE termid = ? AND subjectid = ? AND num = ?;";
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setInt(1, termid);
+                pstmt.setString(2, subjectid);
+            pstmt.setString(3, num);
+            
+            boolean hasresults = pstmt.execute();
+            if (hasresults) {
+                resultset = pstmt.getResultSet();
+            }
+            result = getResultSetAsJSON(resultset);
+            
+        }
+        catch (Exception e) 
+        { 
+            e.printStackTrace(); 
+        }        
         return result;
-        
     }
     
     public int register(int studentid, int termid, int crn) {
         
         int result = 0;
         
-        // INSERT YOUR CODE HERE
+        // INSERT YOUR CODE HERE   
+        //pstmtUpdate - update    
+        PreparedStatement pstmtUpdate;
+        
+        try {       
+        //insert     
+            String query = "INSERT INTO registration (studentid, termid, crn) VALUES (?, ?, ?);";
+            pstmtUpdate = connection.prepareStatement(query);
+            pstmtUpdate.setInt(1, studentid);
+            pstmtUpdate.setInt(2, termid);
+            
+            pstmtUpdate.setInt(3, crn);
+            result = pstmtUpdate.executeUpdate();
+            
+        }
+        catch (Exception e) {
+         e.printStackTrace(); 
+     }
         
         return result;
-        
     }
 
     public int drop(int studentid, int termid, int crn) {
         
         int result = 0;
         
-        // INSERT YOUR CODE HERE
+        // INSERT YOUR CODE HERE       
+        PreparedStatement pstmtUpdate;
+        
+        try {
+//delete
+            String query = "DELETE FROM registration WHERE studentid = ? AND termid = ? AND crn = ?;";
+            pstmtUpdate = connection.prepareStatement(query);  
+            pstmtUpdate.setInt(1, studentid);
+            pstmtUpdate.setInt(2, termid);
+            pstmtUpdate.setInt(3, crn);
+            
+            result = pstmtUpdate.executeUpdate();
+            
+        }
+        catch (Exception e) 
+        {
+         e.printStackTrace(); 
+     }
         
         return result;
         
@@ -54,7 +105,22 @@ public class Database {
         
         int result = 0;
         
-        // INSERT YOUR CODE HERE
+        // INSERT YOUR CODE HERE        
+        PreparedStatement pstmtUpdate;
+        
+        try {
+//withdraw - delete
+            String query = "DELETE FROM registration WHERE studentid = ? AND termid = ?;";
+            pstmtUpdate = connection.prepareStatement(query); 
+            pstmtUpdate.setInt(1, studentid);
+            pstmtUpdate.setInt(2, termid);
+            
+            result = pstmtUpdate.executeUpdate();
+            
+        }
+        catch (Exception e) { 
+            e.printStackTrace(); 
+        }
         
         return result;
         
@@ -65,6 +131,23 @@ public class Database {
         String result = null;
         
         // INSERT YOUR CODE HERE
+        ResultSet resultset = null; 
+        
+        try {
+            String query = "SELECT * FROM registration INNER JOIN section ON registration.crn = section.crn WHERE studentid = ? AND registration.termid = ?;";
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setInt(1, studentid);
+            pstmt.setInt(2, termid);            
+            boolean hasresults = pstmt.execute();
+            if (hasresults) {
+                resultset = pstmt.getResultSet();
+            }
+            result = getResultSetAsJSON(resultset);
+        }
+        catch (Exception e) 
+        {
+         e.printStackTrace(); 
+     }
         
         return result;
         
@@ -130,7 +213,7 @@ public class Database {
         
             try {
 
-                String url = "jdbc:mysql://" + a + "/jsu_sp22_v1?autoReconnect=true&useSSL=false&zeroDateTimeBehavior=CONVERT_TO_NULL&serverTimezone=America/Chicago";
+                String url = "jdbc:mysql://" + a + "/jsu_sp22_v1?autoReconnect=true&useSSL=false&zeroDateTimeBehavior=EXCEPTION&serverTimezone=America/Chicago";
                 // System.err.println("Connecting to " + url + " ...");
 
                 c = DriverManager.getConnection(url, u, p);
